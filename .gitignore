@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+!.env.local.example
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store
+models/
+outputs/
+.infra_ingest/
+.venv/
+*.log
+evals/latest_results.jsonl
+manual_inputs/

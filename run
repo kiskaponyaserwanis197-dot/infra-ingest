@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
+
+if [[ -x "$ROOT_DIR/.venv/bin/python" ]]; then
+  PYTHON_BIN="${PYTHON:-$ROOT_DIR/.venv/bin/python}"
+else
+  PYTHON_BIN="${PYTHON:-python3}"
+fi
+
+usage() {
+  cat <<'EOF'
+infra-ingest unified runner
+
+常用命令:
+  ./run install              创建 .venv 并安装依赖
+  ./run doctor               检查 Python、依赖、ffmpeg、yt-dlp
+  ./run gui                  打开本地图形界面
+  ./run preview              打开 HTML UI 预览
+  ./run example              运行内置示例
+  ./run note <file-or-url>   快速生成基础 Markdown 笔记
+  ./run ingest ...           透传到 python main.py，适合高级参数
+  ./run search <query>       搜索研究库
+  ./run ask <question>       基于研究库问答
+  ./run runs                 查看最近研究运行记录
+  ./run test                 运行测试
+  ./run sync-app             同步到 /Applications/Whisper转写.app
+
+示例:
+  ./run gui
+  ./run note examples/input.txt --title "测试笔记"
+  ./run ingest -i examples/input.txt -o ./outputs --no-llm
+  ./run search "毛利率"
+EOF
+}
+
+cmd="${1:-help}"
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+case "$cmd" in
+  help|-h|--help)
+    usage
+    ;;
+  install)
+    python3 -m venv .venv
+    "$ROOT_DIR/.venv/bin/python" -m pip install --upgrade pip
+    "$ROOT_DIR/.venv/bin/python" -m pip install -e ".[dev]"
+    echo "安装完成。以后可运行: ./run gui"
+    ;;
+  doctor)
+    "$ROOT_DIR/scripts/doctor.sh"
+    ;;
+  gui)
+    "$PYTHON_BIN" app/whisper_gui.py
+    ;;
+  preview)
+    open app/ui_preview.html
+    ;;
+  example)
+    "$PYTHON_BIN" main.py -i examples/input.txt -o "$ROOT_DIR/outputs" --title "infra-ingest example" --no-llm
+    ;;
+  note)
+    if [[ $# -lt 1 ]]; then
+      echo "用法: ./run note <file-or-url> [其他参数]" >&2
+      exit 2
+    fi
+    input="$1"
+    shift
+    "$PYTHON_BIN" main.py -i "$input" -o "$ROOT_DIR/outputs" --no-llm "$@"
+    ;;
+  ingest|cli)
+    "$PYTHON_BIN" main.py "$@"
+    ;;
+  search)
+    if [[ $# -lt 1 ]]; then
+      echo "用法: ./run search <query> [过滤参数]" >&2
+      exit 2
+    fi
+    query="$1"
+    shift
+    "$PYTHON_BIN" main.py --search "$query" "$@"
+    ;;
+  ask)
+    if [[ $# -lt 1 ]]; then
+      echo "用法: ./run ask <question> [过滤参数]" >&2
+      exit 2
+    fi
+    question="$1"
+    shift
+    "$PYTHON_BIN" main.py --ask "$question" "$@"
+    ;;
+  runs)
+    "$PYTHON_BIN" main.py --list-runs "$@"
+    ;;
+  test)
+    "$PYTHON_BIN" -m pytest -q "$@"
+    ;;
+  sync-app)
+    "$ROOT_DIR/scripts/sync_app.sh" "$@"
+    ;;
+  *)
+    echo "未知命令: $cmd" >&2
+    echo >&2
+    usage >&2
+    exit 2
+    ;;
+esac
+

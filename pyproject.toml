@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "infra-ingest"
+version = "0.1.0"
+description = "Local-first AI ingestion pipeline for converting files, media, and links into Markdown research notes."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "faster-whisper==1.2.1",
+    "markitdown[pdf,docx,pptx,xlsx,xls]==0.1.6",
+    "PyMuPDF==1.27.2.3",
+    "pypdf==6.12.2",
+    "requests==2.34.2",
+    "rich==15.0.0",
+    "python-dotenv==1.2.2",
+    "PyYAML==6.0.3",
+    "yt-dlp==2026.3.17",
+]
+
+[project.optional-dependencies]
+app = [
+    "tkinterdnd2==0.5.0",
+]
+dev = [
+    "pytest==9.1.1",
+]
+
+[project.scripts]
+infra-ingest = "infra_ingest.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

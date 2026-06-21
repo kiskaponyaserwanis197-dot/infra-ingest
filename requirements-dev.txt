@@ -1,0 +1,3 @@
+# Compatibility export for development installs.
+# Keep dependency metadata canonical in pyproject.toml.
+pytest==9.1.1

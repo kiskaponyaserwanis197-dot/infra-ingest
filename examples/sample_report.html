@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>AI Infra 投研接入样例</title>
+</head>
+<body>
+  <h1>AI Infra 投研接入样例</h1>
+  <p>本报告讨论如何把非结构化资料转化为可复用知识资产。</p>
+  <h2>核心观察</h2>
+  <ul>
+    <li>音视频资料适合先做本地转写，降低敏感信息外传风险。</li>
+    <li>Office、HTML、PDF 等文档适合先统一转为 Markdown，再交给 LLM 处理。</li>
+    <li>最终输出应进入 Obsidian，而不是停留在一次性摘要。</li>
+  </ul>
+  <h2>工程取舍</h2>
+  <table>
+    <thead>
+      <tr><th>模块</th><th>方案</th><th>原因</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>文档解析</td><td>MarkItDown</td><td>覆盖多格式并保留 Markdown 结构</td></tr>
+      <tr><td>音视频</td><td>faster-whisper</td><td>本地可控、可选择模型大小</td></tr>
+      <tr><td>知识输出</td><td>Obsidian Markdown</td><td>便于双链、检索与复盘</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>

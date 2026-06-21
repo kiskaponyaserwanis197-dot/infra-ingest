@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>infra-ingest 研究工作台 UI 预览</title>
+  <style>
+    :root {
+      --bg: #101214;
+      --panel: #1a1d21;
+      --soft: #20242a;
+      --line: #343a40;
+      --text: #edf2f4;
+      --muted: #8c98a4;
+      --accent: #0f8b8d;
+      --accent-2: #d98e04;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(15, 139, 141, .16), transparent 28%),
+        linear-gradient(315deg, rgba(217, 142, 4, .12), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Avenir Next", "Helvetica Neue", sans-serif;
+    }
+    .app {
+      width: min(1180px, calc(100vw - 40px));
+      margin: 0 auto;
+      padding: 30px 0;
+    }
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 32px;
+      letter-spacing: 0;
+    }
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .shell {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 18px;
+    }
+    .panel {
+      border: 1px solid rgba(255,255,255,.06);
+      background: rgba(26, 29, 33, .94);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.28);
+    }
+    .section {
+      margin: 18px 0 10px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .section:first-child { margin-top: 0; }
+    .mode {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .pill.active {
+      color: white;
+      border-color: var(--accent);
+      background: rgba(15,139,141,.16);
+    }
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .field { margin-bottom: 11px; }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #101214;
+      color: var(--text);
+      border-radius: 6px;
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    .two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 12px 0 16px;
+    }
+    .stat {
+      background: var(--soft);
+      border-radius: 6px;
+      padding: 12px;
+    }
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 15px;
+    }
+    .status {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .bar {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--soft);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .bar::before {
+      content: "";
+      display: block;
+      width: 46%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+    pre {
+      height: 385px;
+      overflow: auto;
+      margin: 0;
+      padding: 16px;
+      border-radius: 8px;
+      background: #0d0f11;
+      color: #cbd5df;
+      font: 13px/1.55 "SF Mono", Menlo, monospace;
+    }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 118px;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    button {
+      border: 0;
+      border-radius: 7px;
+      color: white;
+      background: var(--accent);
+      font-weight: 800;
+      padding: 13px 14px;
+      cursor: default;
+    }
+    button.secondary {
+      background: #2a3037;
+      color: #cbd5df;
+    }
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      header { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>infra-ingest 研究工作台</h1>
+        <div class="sub">转写、结构化笔记、SQLite 研究库和事件研究放进一个工作流。</div>
+      </div>
+      <button class="secondary">打开输出目录</button>
+    </header>
+
+    <section class="shell">
+      <aside class="panel">
+        <div class="section">输入</div>
+        <div class="mode">
+          <div class="pill active">在线链接</div>
+          <div class="pill">本地文件</div>
+        </div>
+        <div class="field"><label>链接</label><input value="https://..." /></div>
+        <div class="field"><label>输出目录</label><input value="~/Documents/Whisper转写笔记" /></div>
+        <div class="field"><label>笔记标题</label><input value="新能源电话会纪要" /></div>
+
+        <div class="section">模型与资料</div>
+        <div class="two">
+          <div class="field"><label>Whisper</label><select><option>small</option></select></div>
+          <div class="field"><label>语言</label><select><option>zh</option></select></div>
+        </div>
+        <div class="field"><label>资料类型</label><select><option>财报电话会</option></select></div>
+        <div class="field"><label>词表文件</label><input value="glossary.txt" /></div>
+
+        <div class="section">量化验证</div>
+        <div class="field"><label>行情 CSV</label><input value="data/prices.csv" /></div>
+        <div class="two">
+          <div class="field"><label>事件日</label><input value="2026-01-02" /></div>
+          <div class="field"><label>基准 ticker</label><input value="000300.SH" /></div>
+        </div>
+
+        <div class="section">LLM</div>
+        <div class="field"><label>模型</label><input value="deepseek-chat" /></div>
+      </aside>
+
+      <section class="panel">
+        <div class="section">运行状态</div>
+        <div class="stats">
+          <div class="stat"><span>输出</span><strong>Markdown</strong></div>
+          <div class="stat"><span>索引</span><strong>SQLite FTS</strong></div>
+          <div class="stat"><span>验证</span><strong>5/20/60日</strong></div>
+        </div>
+        <div class="status">正在处理分块 2/5，等待 LLM 返回 JSON schema...</div>
+        <div class="bar"></div>
+        <pre>命令: python3 main.py -i input.mp3 --material-type earnings_call
+
+[info] Whisper 模型 small 加载成功
+[info] 转写完成，保留 182 个 segments
+[info] 已识别 ticker: 300750.SZ
+[info] 事件研究完成: 5/20/60 日前瞻收益
+[done] Markdown、manifest 和 backtest.json 已写入输出目录</pre>
+        <div class="actions">
+          <button>开始生成研究笔记</button>
+          <button class="secondary">清空日志</button>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
+
