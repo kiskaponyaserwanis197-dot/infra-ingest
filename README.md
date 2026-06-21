@@ -1,46 +1,73 @@
 # infra-ingest
 
-本地优先的 AI 资料摄入流水线：把本地文件、音视频和链接转换成可追溯的 Markdown 研究笔记。
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](pyproject.toml)
+[![Tests](https://img.shields.io/badge/tests-51%20passed-brightgreen)](tests)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-`infra-ingest` 是一个小型 Python 工程，用来把非结构化资料整理成可复用的 Markdown 笔记。它可以读取本地文档、用本地 Whisper 转写音视频、通过 `yt-dlp` 处理支持的 URL，并可选调用兼容 OpenAI Chat Completions 协议的大模型，把内容整理成结构化、可追溯的 Obsidian 笔记。
+Local-first AI research infrastructure for ingesting files, media, and links into traceable Markdown research notes.
 
-这个项目的重点不是“调用一次模型”，而是展示一条完整的资料处理链路：输入识别、下载、解析、转写、结构化、追踪清单、评测和本地输出。
+面向投研团队的本地 AI 资料摄入与检索系统：将研报、电话会、播客、网页和本地文档转成可追溯 Markdown 笔记，并支持金融实体抽取、研究库搜索、RAG 问答和初步事件研究。
 
-## 功能概览
+`infra-ingest` 的重点不是“调用一次大模型做摘要”，而是把 AI 稳定接入真实研究工作流：多源资料摄入、本地转写、结构化生成、来源追踪、索引检索、运行审计和可复现输出。
+
+## Why This Project
+
+投研资料通常分散在 PDF、网页、音视频、会议纪要和本地文件里。单次阅读或一次性 LLM 摘要很难沉淀为团队资产：来源证据容易丢、模型输出难复盘、资料版本不可追踪，后续检索和验证也很费力。
+
+`infra-ingest` 解决的是这条链路中的基础设施问题：把非结构化资料统一转成可追溯、可检索、可复盘的研究笔记，并让每次处理都留下 manifest、hash、模型配置和 sidecar 文件，方便后续审计和迁移。
+
+## Quick Demo
+
+不配置 API key 也可以跑通基础模式：
+
+```bash
+./run ingest -i examples/input.txt -o ./outputs --title "示例笔记" --no-llm
+```
+
+输出包括：
+
+- Markdown 研究笔记
+- `.manifest.json` 处理清单
+- SQLite 研究库索引
+- 可选的 `.segments.json` / `.backtest.json` sidecar
+
+## System Architecture
 
 ```mermaid
 graph TD
-    A[本地文件或 URL] -->|YouTube / Bilibili / 小宇宙链接| B[yt-dlp 提取音频]
-    A -->|PDF / Office / HTML / CSV / JSON| C[MarkItDown 转 Markdown]
-    A -->|音频 / 视频| D[faster-whisper 本地转写]
-    A -->|TXT / Markdown| E[纯文本读取]
-    B --> D
-    C --> F[统一 raw_text]
-    D --> F
-    E --> F
-    F -->|启用 LLM| G[JSON schema 结构化]
-    G --> H[渲染 Markdown 笔记]
-    F -->|不启用 LLM| I[基础 Markdown 笔记]
-    H --> J[输出笔记 + manifest + segments]
-    I --> J
+    A[Files / URLs / Audio / Video] --> B[Input Adapters]
+    B --> C[Document Parsing / yt-dlp / Whisper]
+    C --> D[Normalized raw_text]
+    D --> E{LLM enabled?}
+    E -->|Yes| F[Schema-based structured note]
+    E -->|No| G[Basic Markdown note]
+    F --> H[Finance entity extraction]
+    G --> H
+    H --> I[Markdown + manifest + sidecars]
+    I --> J[SQLite FTS research library]
+    J --> K[Search / RAG ask / Research runs]
 ```
 
-## 主要特性
+更完整的设计说明见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)，业务案例见 [docs/CASE_STUDY.md](docs/CASE_STUDY.md)。
 
-- 支持常见文档转 Markdown：`.pdf`、`.docx`、`.pptx`、`.xlsx`、`.csv`、`.json`、`.xml`、`.html`、`.epub`、`.zip` 等。
-- 支持本地音视频转写：`.mp3`、`.wav`、`.m4a`、`.mp4`、`.mov`、`.flac`、`.ogg`、`.webm` 等。
-- 支持 YouTube、Bilibili、小宇宙等链接输入，底层通过 `yt-dlp` 或备用解析逻辑提取音频。
-- 不配置 LLM API key 时，也可以生成基础 Markdown 笔记。
-- 配置 LLM 后，会要求模型输出 JSON schema，再由本地代码渲染成 Markdown，减少格式漂移。
-- 结论会要求附带来源片段、时间戳、页码或标题线索，增强可追溯性。
-- Whisper 转写会保留 segment 结构，音视频任务会生成 `.segments.json`。
-- 每次处理都会生成 `.manifest.json`，记录输入、输出、hash、模型、prompt 版本和处理时间。
-- 支持专有名词词表和不同资料类型 prompt。
-- 内置小型评测集，可对比不同模型和 prompt 的结构化输出质量。
-- 生成后的笔记会写入本地 SQLite 研究库索引，支持全文搜索、metadata 过滤和基于资料片段的 RAG 问答。
-- 增加量化金融增强层：抽取公司、ticker、行业、指标、因子和风险事件，并生成投资假设、待验证问题和回测想法模板。
-- 保留本地状态：原始资料归档到 `.infra_ingest/raw/`，检索库和图谱保存在 `.infra_ingest/`，便于复盘和迁移。
-- 支持 LLM fallback：主模型失败时可自动切换到备用 OpenAI-compatible 服务。
+## AI Infra Highlights
+
+- Unified ingestion：支持本地文件、音视频、URL、HTML、PDF、Office、CSV、JSON 等输入。
+- Local transcription：通过 `faster-whisper` 在本地转写音视频，降低敏感资料外传风险。
+- Structured LLM layer：启用 LLM 时要求输出 JSON schema，再由本地代码渲染 Markdown，减少格式漂移。
+- Observability：每次运行生成 manifest，记录输入、sha256、模型、prompt、输出路径和处理时间。
+- Retrieval：输出自动进入 SQLite FTS 研究库，支持全文搜索、metadata 过滤和基于资料片段的 RAG 问答。
+- Research extensions：抽取公司、ticker、行业、指标、因子和风险事件，并生成待验证问题和事件研究 sidecar。
+- Reliability：支持 `--no-llm` 基础模式、长文本分块、LLM fallback、pytest 测试和 GitHub Actions CI。
+- Local-first privacy boundary：私密资料可以只在本地解析、转写、索引，不调用远程模型。
+
+## Engineering Quality
+
+- `51` 个 pytest 测试覆盖 pipeline、RAG、SQLite 检索、金融实体、事件研究、manifest、笔记渲染和 URL 解析。
+- GitHub Actions 已配置 Python `3.10` / `3.12` 测试矩阵。
+- 基础模式无需 API key，适合公开 demo 和离线资料处理。
+- `.env`、`.infra_ingest/`、`outputs/`、`manual_inputs/`、缓存和模型文件默认不进入公开仓库。
+- 输出保留 Markdown、manifest、segments、backtest、graph 和 research_runs，方便复盘和调试。
 
 ## 项目结构
 
