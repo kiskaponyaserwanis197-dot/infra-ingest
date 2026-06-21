@@ -16,6 +16,8 @@ Local-first AI research infrastructure for ingesting files, media, and links int
 
 `infra-ingest` 解决的是这条链路中的基础设施问题：把非结构化资料统一转成可追溯、可检索、可复盘的研究笔记，并让每次处理都留下 manifest、hash、模型配置和 sidecar 文件，方便后续审计和迁移。
 
+![infra-ingest portfolio preview](docs/assets/portfolio-site.png)
+
 ## Quick Demo
 
 不配置 API key 也可以跑通基础模式：
