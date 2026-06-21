@@ -69,6 +69,14 @@ graph TD
 - `.env`、`.infra_ingest/`、`outputs/`、`manual_inputs/`、缓存和模型文件默认不进入公开仓库。
 - 输出保留 Markdown、manifest、segments、backtest、graph 和 research_runs，方便复盘和调试。
 
+## Roadmap
+
+- MCP server：让 Claude、Codex 或其他 agent 直接调用 ingest/search/ask 工具。
+- HTTP API：提供给网页前端或团队内部服务使用。
+- Batch processing：支持目录级批处理、任务队列、失败重试和运行状态追踪。
+- Retrieval upgrade：在 SQLite FTS 基础上增加可选向量检索后端。
+- Evaluation suite：扩展 prompt、实体抽取、RAG 引用质量和事件研究输出的评测集。
+
 ## 项目结构
 
 ```text
